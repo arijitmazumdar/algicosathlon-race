@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Algicosathlon</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+	<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<!-- Latest compiled JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>	
+	<script>
+		colorArray =["maroon", "red", "orange", "brown", "tan", 
+			"olive", "yellow", "lime", "green", "cyan", 
+			"teal", "blue", "navy", "purple", "lavender", 
+			"magenta", "pink", "white", "gray", "black",
+			"cyan", "shadow", "rose", "carmine", "indigo" ,"grey"];
+	</script>
+	<style>
+	div.pane {
+		  position: relative;
+		  width: 800px;
+		  height: 400px;
+		  background: grey;
+		}
+	
+	div.piece-red {
+		position: absolute;
+		width: 20px;
+		height: 20px;
+	}
+	
+	div.piece-green {
+		position: relative;
+		width: 20px;
+		height: 20px;
+		background: green;
+		border: 3px solid green;
+	}	
+	</style>
+</head>
+<body>
+<div id="color" >
+	<button id="add-color" onClick="addColor()">Add Color</button>
+	<button id="start-Race" onClick="startRace()">Start Race</button>
+	<input type="text" id="colorTxt"></input>
+	<button id="add-color">Add</button>	
+	<p id="winner"></p>
+	<p id="loser"></p>
+</div>
+
+
+<div class="chart-container" style="position: relative; height:40vh; width:80vw">
+	<canvas id="myChart" width="40" height="40"></canvas>
+</div>
+<br/>  
+<div id="leaderboard"/>
+
+<script>
+	$(function () {
+		var dataSrc = ["australia", "austria", "antartica", "argentina", "algeria"];
+ 
+		$("#colorTxt").autocomplete({
+			source:colorArray
+		});
+	});
+	
+	var labels = colorArray.slice(0,5);
+	var dataLabels = labels.map(function(elem){return [0,elem]})
+	//var myVar = setInterval(changeData, 10000);
+	var myVar;
+	var myTable;
+	var MAXIMUM = 500;
+	
+	function startRace() {
+		init();
+		myVar = setInterval(race, 100);				
+	}
+	
+	function init() {
+		dataLabels.forEach(function(x) { x[0] = 0})
+	}
+	
+	function stopRace() {
+		for(dataLabel of dataLabels) {
+			if(dataLabel[0] >= MAXIMUM) {
+				clearInterval(myVar);
+				showResult();
+			}
+		}
+		
+	}
+	
+	function showResult() {
+		document.getElementById("winner").innerHTML = 'Winner: ' + dataLabels[0][1];
+		document.getElementById("loser").innerHTML = 'Loser: ' + dataLabels[dataLabels.length - 1	][1];
+	}
+	
+	function drawLeaderBoard() {
+		dataStr = "<ol type='1'>"
+		dataLabels.forEach(function(elem) {return dataStr += "<li>"+ elem[1]+ " - " +elem[0]+"</li>"});
+		dataStr += "</ol>"
+		document.getElementById("leaderboard").innerHTML = dataStr
+	}
+	
+	function race() {
+		changeData();
+		stopRace();
+		draw();	
+		drawLeaderBoard();
+	}
+	
+
+	function changeData() {
+		dataLabels.forEach(function(elem){elem[0] += Math.floor(Math.random() * 10)})
+		dataLabels.sort(function(elem1, elem2) {return elem2[0] - elem1[0]});
+	}
+	
+	function draw() {
+		data = dataLabels.map(function(n) {return n[0]});
+		labels = dataLabels.map(function(n) {return n[1]});
+		//document.getElementById("loser").innerHTML = 'Loser: ' + labels[looserIndex];
+		
+		var ctx = document.getElementById('myChart').getContext('2d');
+		var chart = new Chart(ctx, {
+			// The type of chart we want to create
+			type: 'horizontalBar',
+
+			// The data for our dataset
+			data: {
+				labels: labels,
+				datasets: [{
+					label: 'Algicosathlon score',
+					backgroundColor: labels,
+					borderColor: 'rgb(255, 99, 132)',
+					data: data
+					}]
+				},
+				showTooltips: true,
+				onAnimationComplete: function () {
+
+					var ctx = this.chart.ctx;
+					ctx.font = this.scale.font;
+					ctx.fillStyle = this.scale.textColor
+					ctx.textAlign = "center";
+					ctx.textBaseline = "bottom";
+
+					this.datasets.forEach(function (dataset) {
+						dataset.bars.forEach(function (bar) {
+							ctx.fillText(bar.value, 0, 0);
+						});
+					})
+				},				
+				// Configuration options go here
+				options: {
+					maintainAspectRatio: false,
+					scales: {
+						xAxes: [{
+							ticks: {
+								max: MAXIMUM,
+								min: 0,
+								stepSize: 10
+							}
+						}]
+					},
+					animation: {
+						duration: 0, // general animation time
+					},
+					hover: {
+						animationDuration: 0, // duration of animations when hovering an item
+					},
+					responsiveAnimationDuration: 0, // animation duration after a resize
+				}
+		});
+	}
+
+	function addColor() {
+		dataLabels.push([0, colorArray[dataLabels.length]])
+	}
+	
+	
+
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,11 @@
+{
+    "name": "my-electron-app",
+    "version": "0.1.0",
+    "author": "Arijit Mazumdar",
+    "description": "Algicosathlon game",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron ."
+    }
+}
+
